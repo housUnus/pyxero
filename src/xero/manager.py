@@ -1,10 +1,12 @@
+from __future__ import unicode_literals
+
 from .basemanager import BaseManager
 from .constants import XERO_API_URL
 from .utils import resolve_user_agent, singular
 
 
 class Manager(BaseManager):
-    def __init__(self, name, credentials, unit_price_4dps=False, user_agent=None):
+    def __init__(self, name, credentials, unit_price_4dps=False, user_agent=None, cache_in=0):
         from xero import __version__ as VERSION  # noqa
 
         self.credentials = credentials
@@ -15,6 +17,7 @@ class Manager(BaseManager):
         self.user_agent = resolve_user_agent(
             user_agent, getattr(credentials, "user_agent", None)
         )
+        self.cache_in = cache_in
 
         for method_name in self.DECORATED_METHODS:
             method = getattr(self, "_%s" % method_name)
@@ -25,3 +28,4 @@ class Manager(BaseManager):
             for method_name in object_decorated_methods:
                 method = getattr(self, "_%s" % method_name)
                 setattr(self, method_name, self._get_data(method))
+        super().__init__()
