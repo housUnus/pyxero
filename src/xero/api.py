@@ -1,11 +1,12 @@
+from __future__ import unicode_literals
+
 from .filesmanager import FilesManager
 from .manager import Manager
-from .paymentmanager import PaymentManager
 from .payrollmanager import PayrollManager
 from .projectmanager import ProjectManager
 
 
-class Xero:
+class Xero(object):
     """An ORM-like interface to the Xero API"""
 
     OBJECT_LIST = (
@@ -40,21 +41,16 @@ class Xero:
         "Quotes",
     )
 
-    def __init__(self, credentials, unit_price_4dps=False, user_agent=None):
+    def __init__(self, credentials, unit_price_4dps=False, user_agent=None, cache_in=0):
         # Iterate through the list of objects we support, for
         # each of them create an attribute on our self that is
         # the lowercase name of the object and attach it to an
         # instance of a Manager object to operate on it
         for name in self.OBJECT_LIST:
-            manager_class = Manager
-
-            if name == "Payments":
-                manager_class = PaymentManager
-
             setattr(
                 self,
                 name.lower(),
-                manager_class(name, credentials, unit_price_4dps, user_agent),
+                Manager(name, credentials, unit_price_4dps, user_agent, cache_in),
             )
 
         setattr(self, "filesAPI", Files(credentials))
@@ -62,7 +58,7 @@ class Xero:
         setattr(self, "projectsAPI", Project(credentials))
 
 
-class Files:
+class Files(object):
     """An ORM-like interface to the Xero Files API"""
 
     OBJECT_LIST = (
@@ -81,7 +77,7 @@ class Files:
             setattr(self, name.lower(), FilesManager(name, credentials))
 
 
-class Payroll:
+class Payroll(object):
     """An ORM-like interface to the Xero Payroll API"""
 
     OBJECT_LIST = (
@@ -104,7 +100,7 @@ class Payroll:
             )
 
 
-class Project:
+class Project(object):
     """An ORM-like interface to the Xero Projects API"""
 
     OBJECT_LIST = (
