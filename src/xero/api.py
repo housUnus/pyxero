@@ -41,7 +41,7 @@ class Xero(object):
         "Quotes",
     )
 
-    def __init__(self, credentials, unit_price_4dps=False, user_agent=None, cache_in=0):
+    def __init__(self, credentials, unit_price_4dps=False, user_agent=None, cache_in=0, org_id=""):
         # Iterate through the list of objects we support, for
         # each of them create an attribute on our self that is
         # the lowercase name of the object and attach it to an
@@ -50,7 +50,7 @@ class Xero(object):
             setattr(
                 self,
                 name.lower(),
-                Manager(name, credentials, unit_price_4dps, user_agent, cache_in),
+                Manager(name, credentials, unit_price_4dps, user_agent, cache_in, org_id),
             )
 
         setattr(self, "filesAPI", Files(credentials))
