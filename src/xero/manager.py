@@ -6,7 +6,7 @@ from .utils import resolve_user_agent, singular
 
 
 class Manager(BaseManager):
-    def __init__(self, name, credentials, unit_price_4dps=False, user_agent=None, cache_in=0):
+    def __init__(self, name, credentials, unit_price_4dps=False, user_agent=None, cache_in=0, org_id=""):
         from xero import __version__ as VERSION  # noqa
 
         self.credentials = credentials
@@ -18,6 +18,7 @@ class Manager(BaseManager):
             user_agent, getattr(credentials, "user_agent", None)
         )
         self.cache_in = cache_in
+        self.org_id = org_id
 
         for method_name in self.DECORATED_METHODS:
             method = getattr(self, "_%s" % method_name)
