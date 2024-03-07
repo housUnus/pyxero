@@ -126,6 +126,11 @@ class BaseManager(object):
 
     def __init__(self):
         self.session = CachedSession(expire_after=self.cache_in)
+        # cache.clear()
+        # print(f"==>> cache: {cache}")
+        # cursor = connections['cache_database'].cursor()
+        # cursor.execute('DELETE FROM cache_table')
+        # transaction.commit_unless_managed(using='cache_database')
 
     def dict_to_xml(self, root_elm, data):
         for key in data.keys():
@@ -221,26 +226,24 @@ class BaseManager(object):
             # Set a user-agent so Xero knows the traffic is coming from pyxero
             # or individual user/partner
             headers["User-Agent"] = self.user_agent
-            
+
             #Prevent more than 60 calls per minute logic
             current_time = time.time()
-            first_call_time = cache.get('first_call_time')   
-                     
+            first_call_time = cache.get(str(self.org_id) + 'first_call_time')   
             if first_call_time is None or current_time - first_call_time >= 60:
-                cache.set('first_call_time', current_time)
-                cache.set('num_calls', 0)
+                cache.set(str(self.org_id) + 'first_call_time', current_time)
+                cache.set(str(self.org_id) + 'num_calls', 0)
                 first_call_time = current_time
-                
-            num_calls = cache.get('num_calls', 0)
-            
-            if num_calls >= 55:
+
+            num_calls = cache.get(str(self.org_id) + 'num_calls', 0)
+
+            if num_calls >= 58:
                 remaining_time = 60 - (current_time - first_call_time)
                 time.sleep(remaining_time)
-                cache.set('first_call_time', time.time())
-                cache.set('num_calls', 0)
-        
+                cache.set(str(self.org_id) + 'first_call_time', time.time())
+                cache.set(str(self.org_id) + 'num_calls', 0)
+            params['i'] = self.org_id
             #Prevent more than 60 calls per minute logic
-        
             response = getattr(self.session, method)(
                 uri,
                 data=body,
@@ -250,9 +253,9 @@ class BaseManager(object):
                 timeout=timeout,
             )
             # Logic continue
-            cache.incr('num_calls')
+            cache.incr(str(self.org_id) + 'num_calls')
             # End Logic continue
-           
+
             if response.status_code == 200:
                 # If we haven't got XML or JSON, assume we're being returned a
                 # binary file
@@ -334,7 +337,6 @@ class BaseManager(object):
     def get_attachment(self, id, filename, file):
         """
         Retrieve the contents of a specific attachment (identified by filename).
-
         Writes data to file object, returns length of data written.
         """
         data = self.get_attachment_data(id, filename)
